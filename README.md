@@ -105,6 +105,5 @@ Không đưa mã truy cập hoặc thông tin cá nhân vào mã nguồn.
 
 📄 Giấy phép
 
-Dự án này được phân phối dưới giấy phép MIT. Xem tệp LICENSE để biết thêm chi tiết.
-
+Dự án này được phân phối dưới giấy phép MIT. Xem tệp [LICENSE](LICENSE) để biết thêm chi tiết.
 Ragnarok Control Center — một menu, nhiều công cụ.
