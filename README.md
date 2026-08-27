@@ -15,6 +15,7 @@ Lưu tệp đầu ra gọn gàng theo từng nhóm trong thư mục output/.
 Python: 3.10 trở lên (tối ưu tốt nhất trên Windows).
 
 Phần cứng/Dịch vụ bổ sung: Webcam (cho Camera), Micro (ghi âm), API OpenWeather (thời tiết), và mã Gemini (trò chuyện AI).
+
 📦 Cài đặt
 
 1. Tải mã nguồn
