@@ -1,0 +1,34 @@
+# Core UI
+rich>=13.0.0
+
+# Vision & codes
+opencv-python>=4.8.0
+qrcode[pil]>=7.4
+python-barcode>=0.15.1
+Pillow>=10.0.0
+
+# Lookup & data
+requests>=2.31.0
+unidecode>=1.3.0
+wikipedia>=1.4.0
+mendeleev>=0.15.0
+tcgdex-sdk>=2.0.0
+
+# Media
+pygame>=2.5.0
+mutagen>=1.47.0
+yt-dlp>=2024.1.0
+gTTS>=2.5.0
+
+# PDF tools (merge + password protect)
+pypdf>=4.0.0
+
+# Voice recorder (optional – cần mic + PortAudio)
+sounddevice>=0.4.6
+numpy>=1.24.0
+
+# AI (optional – Gemini)
+google-genai>=1.0.0
+
+# System monitor
+psutil>=5.9.0
