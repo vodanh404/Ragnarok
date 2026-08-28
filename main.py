@@ -1,6 +1,6 @@
 """
 RAGNAROK CONTROL CENTER - Entry point
-Poket_studio v1.0.0
+Poket_studio v2.0.0
 """
 
 import os
