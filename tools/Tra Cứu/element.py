@@ -9,29 +9,29 @@ from rich.table import Table
 from ui.console import console
 
 _FALLBACK = {
-    "H": ("Hydro", 1, 1.008, "Phi kim"),
-    "He": ("Heli", 2, 4.003, "Khí hiếm"),
-    "Li": ("Liti", 3, 6.94, "Kim loại kiềm"),
-    "C": ("Cacbon", 6, 12.011, "Phi kim"),
-    "N": ("Nitơ", 7, 14.007, "Phi kim"),
-    "O": ("Oxy", 8, 15.999, "Phi kim"),
-    "Na": ("Natri", 11, 22.990, "Kim loại kiềm"),
-    "Mg": ("Magie", 12, 24.305, "Kim loại kiềm thổ"),
-    "Al": ("Nhôm", 13, 26.982, "Kim loại hậu chuyển tiếp"),
-    "Si": ("Silic", 14, 28.085, "Á kim"),
-    "P": ("Photpho", 15, 30.974, "Phi kim"),
-    "S": ("Lưu huỳnh", 16, 32.06, "Phi kim"),
-    "Cl": ("Clo", 17, 35.45, "Halogen"),
-    "K": ("Kali", 19, 39.098, "Kim loại kiềm"),
-    "Ca": ("Canxi", 20, 40.078, "Kim loại kiềm thổ"),
-    "Fe": ("Sắt", 26, 55.845, "Kim loại chuyển tiếp"),
-    "Cu": ("Đồng", 29, 63.546, "Kim loại chuyển tiếp"),
-    "Zn": ("Kẽm", 30, 65.38, "Kim loại chuyển tiếp"),
-    "Ag": ("Bạc", 47, 107.87, "Kim loại chuyển tiếp"),
-    "Au": ("Vàng", 79, 196.97, "Kim loại chuyển tiếp"),
-    "Hg": ("Thủy ngân", 80, 200.59, "Kim loại chuyển tiếp"),
-    "Pb": ("Chì", 82, 207.2, "Kim loại hậu chuyển tiếp"),
-    "U": ("Urani", 92, 238.03, "Họ Actini"),
+    "H": ("Hydrogen", 1, 1.008, "Nonmetal"),
+    "He": ("Helium", 2, 4.003, "Noble gas"),
+    "Li": ("Lithium", 3, 6.94, "Alkali metal"),
+    "C": ("Carbon", 6, 12.011, "Nonmetal"),
+    "N": ("Nitrogen", 7, 14.007, "Nonmetal"),
+    "O": ("Oxygen", 8, 15.999, "Nonmetal"),
+    "Na": ("Sodium", 11, 22.990, "Alkali metal"),
+    "Mg": ("Magnesium", 12, 24.305, "Alkaline earth"),
+    "Al": ("Aluminium", 13, 26.982, "Post-transition"),
+    "Si": ("Silicon", 14, 28.085, "Metalloid"),
+    "P": ("Phosphorus", 15, 30.974, "Nonmetal"),
+    "S": ("Sulfur", 16, 32.06, "Nonmetal"),
+    "Cl": ("Chlorine", 17, 35.45, "Halogen"),
+    "K": ("Potassium", 19, 39.098, "Alkali metal"),
+    "Ca": ("Calcium", 20, 40.078, "Alkaline earth"),
+    "Fe": ("Iron", 26, 55.845, "Transition metal"),
+    "Cu": ("Copper", 29, 63.546, "Transition metal"),
+    "Zn": ("Zinc", 30, 65.38, "Transition metal"),
+    "Ag": ("Silver", 47, 107.87, "Transition metal"),
+    "Au": ("Gold", 79, 196.97, "Transition metal"),
+    "Hg": ("Mercury", 80, 200.59, "Transition metal"),
+    "Pb": ("Lead", 82, 207.2, "Post-transition"),
+    "U": ("Uranium", 92, 238.03, "Actinide"),
 }
 
 
@@ -40,14 +40,14 @@ def feature_element() -> None:
     console.print("[bold cyan]═══ BẢNG TUẦN HOÀN ═══[/bold cyan]\n")
     console.print(
         "[dim]Nhập ký hiệu (H, Fe, Au…) hoặc số hiệu nguyên tử. "
-        "Gõ [yellow]danh sách[/yellow] để xem mẫu, [yellow]q[/yellow] thoát.[/dim]\n"
+        "Gõ [yellow]list[/yellow] để xem mẫu, [yellow]q[/yellow] thoát.[/dim]\n"
     )
 
     while True:
         query = Prompt.ask("[bold]Nguyên tố[/bold]").strip()
         if not query or query.lower() in ("q", "quit", "exit"):
             break
-        if query.lower() in ("list", "danh sách"):
+        if query.lower() == "list":
             _print_sample()
             continue
 
@@ -55,7 +55,7 @@ def feature_element() -> None:
             continue
         _try_fallback(query)
 
-    Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+    Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
 
 
 def _try_mendeleev(query: str) -> bool:
@@ -75,7 +75,7 @@ def _try_mendeleev(query: str) -> bool:
             f"Số hiệu Z     : {el.atomic_number}\n"
             f"Khối lượng    : {el.atomic_weight}\n"
             f"Nhóm / Chu kỳ : {el.group_id} / {el.period}\n"
-            f"Phân khối         : {el.block}\n"
+            f"Block         : {el.block}-block\n"
             f"Trạng thái    : {getattr(el, 'series', 'N/A')}\n"
             f"Cấu hình e    : {getattr(el, 'econf', 'N/A')}\n"
             f"Điểm nóng chảy: {getattr(el, 'melting_point', 'N/A')} K\n"
@@ -84,7 +84,7 @@ def _try_mendeleev(query: str) -> bool:
         console.print(Panel(info, title="Nguyên tố", border_style="green"))
         return True
     except Exception as exc:
-        console.print(f"[yellow]Thư viện tra cứu:[/yellow] {exc} → thử dữ liệu dự phòng...")
+        console.print(f"[yellow]mendeleev:[/yellow] {exc} → thử fallback...")
         return False
 
 
@@ -121,15 +121,18 @@ def _try_fallback(query: str) -> None:
         f"Khối lượng : {mass}\n"
         f"Nhóm       : {series}"
     )
-    console.print(Panel(info, title="Nguyên tố (dữ liệu dự phòng)", border_style="yellow"))
+    console.print(Panel(info, title="Nguyên tố (fallback)", border_style="yellow"))
 
 
 def _print_sample() -> None:
-    table = Table(title="Một số nguyên tố tiêu biểu", border_style="cyan")
+    table = Table(title="Một số nguyên tố mẫu", border_style="cyan")
     table.add_column("Ký hiệu", style="bold")
     table.add_column("Tên")
     table.add_column("Z", justify="right")
-    table.add_column("Khối lượng", justify="right")
+    table.add_column("Mass", justify="right")
     for sym, (name, z, mass, _) in list(_FALLBACK.items())[:12]:
         table.add_row(sym, name, str(z), str(mass))
     console.print(table)
+
+# Entry point chuẩn cho tool_loader (xem tool_loader.py).
+run = feature_element

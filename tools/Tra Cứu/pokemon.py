@@ -8,28 +8,12 @@ from rich.table import Table
 
 from ui.console import console
 
-STAT_NAMES = {
-    "hp": "Máu", "attack": "Tấn công", "defense": "Phòng thủ",
-    "special-attack": "Tấn công đặc biệt", "special-defense": "Phòng thủ đặc biệt",
-    "speed": "Tốc độ",
-}
-TYPE_NAMES = {
-    "normal": "Thường", "fire": "Lửa", "water": "Nước", "electric": "Điện",
-    "grass": "Cỏ", "ice": "Băng", "fighting": "Giác đấu", "poison": "Độc",
-    "ground": "Đất", "flying": "Bay", "psychic": "Tâm linh", "bug": "Bọ",
-    "rock": "Đá", "ghost": "Ma", "dragon": "Rồng", "dark": "Bóng tối",
-    "steel": "Thép", "fairy": "Tiên",
-}
-
-def _translate_name(value: str, mapping: dict[str, str]) -> str:
-    return mapping.get(value.lower(), value)
-
 
 def feature_pokemon() -> None:
     """Tra cứu thông tin Pokémon hoặc thẻ TCG."""
     console.print("[bold cyan]═══ POKÉDEX / TCG ═══[/bold cyan]\n")
     mode = Prompt.ask(
-        "Chế độ ([cyan]1[/cyan]=Loài Pokémon, [cyan]2[/cyan]=Thẻ Pokémon ID)",
+        "Chế độ ([cyan]1[/cyan]=Pokémon species, [cyan]2[/cyan]=TCG Card ID)",
         choices=["1", "2"],
         default="1",
     )
@@ -39,7 +23,7 @@ def feature_pokemon() -> None:
     else:
         _lookup_tcg_card()
 
-    Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+    Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
 
 
 def _lookup_species() -> None:
@@ -62,20 +46,20 @@ def _lookup_species() -> None:
             return
         data = resp.json()
 
-        types = ", ".join(_translate_name(t["type"]["name"], TYPE_NAMES) for t in data["types"])
+        types = ", ".join(t["type"]["name"] for t in data["types"])
         abilities = ", ".join(a["ability"]["name"] for a in data["abilities"])
-        stats_table = Table(title="Chỉ số cơ bản", border_style="yellow")
-        stats_table.add_column("Chỉ số", style="cyan")
-        stats_table.add_column("Giá trị", justify="right")
+        stats_table = Table(title="Base Stats", border_style="yellow")
+        stats_table.add_column("Stat", style="cyan")
+        stats_table.add_column("Value", justify="right")
         for s in data["stats"]:
-            stats_table.add_row(_translate_name(s["stat"]["name"], STAT_NAMES), str(s["base_stat"]))
+            stats_table.add_row(s["stat"]["name"], str(s["base_stat"]))
 
         info = (
             f"[bold]{data['name'].title()}[/bold]  (#{data['id']})\n"
             f"Chiều cao : {data['height'] / 10} m\n"
             f"Cân nặng  : {data['weight'] / 10} kg\n"
             f"Hệ        : {types}\n"
-            f"Kỹ năng   : {abilities}"
+            f"Ability   : {abilities}"
         )
         console.print(Panel(info, title="Pokémon", border_style="green"))
         console.print(stats_table)
@@ -85,7 +69,7 @@ def _lookup_species() -> None:
 
 def _lookup_tcg_card() -> None:
     card_id = Prompt.ask(
-        "[bold]Mã thẻ (vd: swsh3-136)[/bold]",
+        "[bold]Card ID (vd: swsh3-136)[/bold]",
         default="swsh3-136",
     ).strip()
     if not card_id:
@@ -112,23 +96,23 @@ def _lookup_tcg_card() -> None:
         lines = [
             f"[bold]{card.name}[/bold]",
             f"ID      : {card.id}",
-            f"Mã nội bộ: {getattr(card, 'localId', 'N/A')}",
-            f"Họa sĩ: {getattr(card, 'illustrator', 'N/A')}",
-            f"Độ hiếm : {getattr(card, 'rarity', 'N/A')}",
+            f"Local ID: {getattr(card, 'localId', 'N/A')}",
+            f"Illustrator: {getattr(card, 'illustrator', 'N/A')}",
+            f"Rarity  : {getattr(card, 'rarity', 'N/A')}",
             f"HP      : {getattr(card, 'hp', 'N/A')}",
-            f"Hệ       : {getattr(card, 'types', 'N/A')}",
+            f"Types   : {getattr(card, 'types', 'N/A')}",
         ]
         if hasattr(card, "set") and card.set:
-            lines.append(f"Bộ      : {card.set.name} ({card.set.id})")
+            lines.append(f"Set     : {card.set.name} ({card.set.id})")
 
         if hasattr(card, "attacks") and card.attacks:
-            lines.append("\n[bold]Đòn đánh[/bold]")
+            lines.append("\n[bold]Attacks[/bold]")
             for atk in card.attacks:
                 cost = ", ".join(atk.cost) if getattr(atk, "cost", None) else "—"
                 dmg = getattr(atk, "damage", "N/A")
                 lines.append(f"  • {atk.name} [{cost}] → {dmg}")
 
-        console.print(Panel("\n".join(lines), title="Thẻ Pokémon", border_style="magenta"))
+        console.print(Panel("\n".join(lines), title="TCG Card", border_style="magenta"))
 
         try:
             img_url = card.get_image_url(quality=Quality.HIGH, extension=Extension.PNG)
@@ -137,3 +121,6 @@ def _lookup_tcg_card() -> None:
             pass
     except Exception as exc:
         console.print(f"[red]Lỗi TCG:[/red] {exc}")
+
+# Entry point chuẩn cho tool_loader (xem tool_loader.py).
+run = feature_pokemon

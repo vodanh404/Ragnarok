@@ -12,33 +12,33 @@ from output_paths import output_path
 
 def feature_tts() -> None:
     """Chuyển văn bản thành file MP3."""
-    console.print("[bold cyan]═══ CHUYỂN VĂN BẢN THÀNH GIỌNG NÓI ═══[/bold cyan]\n")
+    console.print("[bold cyan]═══ TEXT TO SPEECH (gTTS) ═══[/bold cyan]\n")
 
     text = Prompt.ask("[bold]Nhập văn bản cần đọc[/bold]")
     if not text.strip():
         console.print("[red]Văn bản trống. Hủy.[/red]")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     lang = Prompt.ask("[bold]Ngôn ngữ[/bold]", default="vi")
     slow = Confirm.ask("Đọc chậm?", default=False)
     out_name = Prompt.ask(
-        "[bold]Tên tệp xuất[/bold]",
+        "[bold]Tên file xuất[/bold]",
         default="output.mp3",
     ).strip() or "output.mp3"
     if not out_name.endswith(".mp3"):
         out_name += ".mp3"
     out_path = output_path("audio", out_name, "output.mp3")
     if out_path.exists():
-        if not Confirm.ask(f"[yellow]Tệp đã tồn tại:[/yellow] {out_path}. Ghi đè?", default=False):
+        if not Confirm.ask(f"[yellow]File đã tồn tại:[/yellow] {out_path}. Ghi đè?", default=False):
             console.print("[dim]Đã hủy để tránh ghi đè file.[/dim]")
-            Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+            Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
             return
 
     try:
         from gtts import gTTS
 
-        console.print("[yellow]Đang tạo âm thanh...[/yellow]")
+        console.print("[yellow]Đang tạo audio...[/yellow]")
         tts = gTTS(text=text, lang=lang, slow=slow)
         tts.save(str(out_path))
         console.print(f"[bold green]✓ Đã lưu:[/bold green] {out_path.resolve()}")
@@ -52,7 +52,7 @@ def feature_tts() -> None:
     except Exception as exc:
         console.print(f"[red]Lỗi TTS:[/red] {exc}")
 
-    Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+    Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
 
 
 def _play_audio(path: Path) -> None:
@@ -82,10 +82,13 @@ def _play_audio(path: Path) -> None:
                     else:
                         subprocess.run([player, str(path)], check=False)
                     return
-            console.print("[yellow]Không tìm thấy trình phát âm thanh.[/yellow]")
+            console.print("[yellow]Không tìm thấy trình phát audio.[/yellow]")
         elif sys.platform == "win32":
             os.startfile(str(path))  # type: ignore[attr-defined]
         else:
-            console.print(f"[dim]Mở tệp thủ công: {path}[/dim]")
+            console.print(f"[dim]Mở file thủ công: {path}[/dim]")
     except Exception as exc:
-        console.print(f"[yellow]Không phát được âm thanh:[/yellow] {exc}")
+        console.print(f"[yellow]Không phát được audio:[/yellow] {exc}")
+
+# Entry point chuẩn cho tool_loader (xem tool_loader.py).
+run = feature_tts

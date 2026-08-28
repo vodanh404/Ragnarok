@@ -19,14 +19,14 @@ def feature_wiki() -> None:
         console.print(
             "[red]Thiếu thư viện. Cài đặt:[/red] [yellow]pip install wikipedia[/yellow]"
         )
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     wikipedia.set_lang("vi")
     query = Prompt.ask("[bold]Từ khóa tìm kiếm[/bold]").strip()
     if not query:
         console.print("[red]Từ khóa trống.[/red]")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     try:
@@ -43,4 +43,7 @@ def feature_wiki() -> None:
     except Exception as exc:
         console.print(f"[red]Lỗi:[/red] {exc}")
 
-    Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+    Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
+
+# Entry point chuẩn cho tool_loader (xem tool_loader.py).
+run = feature_wiki

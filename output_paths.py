@@ -1,7 +1,7 @@
 """Centralized output folders for Ragnarok Control Center."""
 from pathlib import Path
 
-APP_ROOT = Path(__file__).resolve().parent.parent
+APP_ROOT = Path(__file__).resolve().parent
 OUTPUT_DIR = APP_ROOT / "output"
 
 CATEGORIES = {

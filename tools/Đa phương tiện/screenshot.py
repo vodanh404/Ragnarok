@@ -22,7 +22,7 @@ def feature_screenshot() -> None:
         console.print(
             "[red]Thiếu thư viện. Cài đặt:[/red] [yellow]pip install Pillow[/yellow]"
         )
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     save_dir = output_path("screenshots", "_folder_marker").parent
@@ -34,16 +34,16 @@ def feature_screenshot() -> None:
     )
     default_name = f"shot_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{fmt}"
     name = Prompt.ask(
-        "[bold]Tên tệp[/bold]",
+        "[bold]Tên file[/bold]",
         default=default_name,
     ).strip() or default_name
     if not name.lower().endswith(f".{fmt}"):
         name = f"{name}.{fmt}"
     out_path = output_path("screenshots", name, default_name)
     if out_path.exists():
-        if not Confirm.ask(f"[yellow]Tệp đã tồn tại:[/yellow] {out_path}. Ghi đè?", default=False):
+        if not Confirm.ask(f"[yellow]File đã tồn tại:[/yellow] {out_path}. Ghi đè?", default=False):
             console.print("[dim]Đã hủy để tránh ghi đè file.[/dim]")
-            Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+            Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
             return
 
     delay_raw = Prompt.ask(
@@ -87,4 +87,7 @@ def feature_screenshot() -> None:
     except Exception as exc:
         console.print(f"[red]Lỗi chụp màn hình:[/red] {exc}")
 
-    Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+    Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
+
+# Entry point chuẩn cho tool_loader (xem tool_loader.py).
+run = feature_screenshot

@@ -1,6 +1,6 @@
 """
 AI Chat CLI (port terminal chat từ module_AI/Chat_bot.py).
-Yêu cầu: google-genai + mã truy cập Gemini.
+Yêu cầu: google-genai + API key Gemini.
 """
 
 import configparser
@@ -20,7 +20,7 @@ DEFAULT_MODEL = "gemini-3.6-flash"
 
 
 def _load_gemini_api_key() -> str:
-    """Đọc mã truy cập từ env rồi config.ini. Không hard-code."""
+    """Đọc API key từ env rồi config.ini. Không hard-code."""
     key = (
         os.environ.get("GEMINI_API_KEY")
         or os.environ.get("GOOGLE_API_KEY")
@@ -41,7 +41,7 @@ def _load_gemini_api_key() -> str:
 
 
 def _save_gemini_api_key(api_key: str) -> None:
-    """Lưu mã truy cập vào config.ini (section Gemini)."""
+    """Lưu API key vào config.ini (section Gemini)."""
     config = configparser.ConfigParser()
     if CONFIG_FILE.exists():
         config.read(CONFIG_FILE, encoding="utf-8")
@@ -59,28 +59,28 @@ def _friendly_api_error(exc: Exception) -> str:
 
     if "api_key" in msg or "authentication" in msg or "401" in msg or "permission" in msg:
         return (
-            "Lỗi xác thực mã truy cập. Kiểm tra lại GEMINI_API_KEY / GOOGLE_API_KEY "
+            "Lỗi xác thực API key. Kiểm tra lại GEMINI_API_KEY / GOOGLE_API_KEY "
             "hoặc key trong config.ini."
         )
     if "quota" in msg or "rate" in msg or "429" in msg or "resource_exhausted" in msg:
         return "Đã hết hạn mức (quota) hoặc bị giới hạn tốc độ. Thử lại sau."
     if "not found" in msg or "404" in msg or "model" in msg and "not" in msg:
         return (
-            f"Mô hình không tồn tại hoặc đã bị tắt. "
-            f"Thử mô hình khác (ví dụ: {DEFAULT_MODEL})."
+            f"Model không tồn tại hoặc đã bị tắt. "
+            f"Thử model khác (ví dụ: {DEFAULT_MODEL})."
         )
-    if "thời gian chờ" in msg or "quá thời gian" in msg or "deadline" in msg:
-        return "Hết thời gian chờ (thời gian chờ). Kiểm tra mạng và thử lại."
+    if "timeout" in msg or "timed out" in msg or "deadline" in msg:
+        return "Hết thời gian chờ (timeout). Kiểm tra mạng và thử lại."
     if "connection" in msg or "network" in msg or "unreachable" in msg:
         return "Lỗi kết nối mạng. Kiểm tra Internet."
     if "invalid" in msg and "key" in msg:
-        return "mã truy cập không hợp lệ."
+        return "API key không hợp lệ."
     return f"Lỗi API ({type(exc).__name__}): {exc}"
 
 
 def feature_ai_waifu() -> None:
     """Chat đơn giản với Gemini (CLI)."""
-    console.print("[bold cyan]═══ TRÒ CHUYỆN AI / WAIFU (Gemini) ═══[/bold cyan]\n")
+    console.print("[bold cyan]═══ AI CHAT / WAIFU (Gemini) ═══[/bold cyan]\n")
     console.print(
         "[dim]Phiên bản CLI. Live2D GUI cần Tkinter + live2d + pygame "
         "(xem module gốc module_AI/AI_Waifu.py).[/dim]\n"
@@ -88,13 +88,13 @@ def feature_ai_waifu() -> None:
 
     api_key = _load_gemini_api_key()
     if api_key:
-        console.print("[green]Đã tìm thấy mã truy cập (env hoặc config.ini).[/green]")
+        console.print("[green]Đã tìm thấy API key (env hoặc config.ini).[/green]")
         use_saved = Prompt.ask(
-            "Dùng mã truy cập đã lưu?", choices=["y", "n"], default="y"
+            "Dùng key đã có?", choices=["y", "n"], default="y"
         )
         if use_saved == "n":
             api_key = Prompt.ask(
-                "[bold]Mã truy cập dịch vụ[/bold]",
+                "[bold]Gemini API key[/bold]",
                 password=True,
             ).strip()
     else:
@@ -103,23 +103,23 @@ def feature_ai_waifu() -> None:
             "hoặc lưu vào config.ini [Gemini] API_Key.[/dim]"
         )
         api_key = Prompt.ask(
-            "[bold]Mã truy cập dịch vụ[/bold] (hoặc set env GEMINI_API_KEY)",
+            "[bold]Gemini API key[/bold] (hoặc set env GEMINI_API_KEY)",
             password=True,
         ).strip()
 
     if not api_key:
-        console.print("[red]Thiếu mã truy cập. Hủy.[/red]")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        console.print("[red]Thiếu API key. Hủy.[/red]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     # Lưu nếu người dùng muốn (chỉ khi vừa nhập mới)
     save = Prompt.ask(
-        "Lưu mã truy cập vào tệp cấu hình?", choices=["y", "n"], default="n"
+        "Lưu API key vào config.ini?", choices=["y", "n"], default="n"
     )
     if save == "y":
         try:
             _save_gemini_api_key(api_key)
-            console.print("[green]Đã lưu mã truy cập vào config.ini[/green]")
+            console.print("[green]Đã lưu API key vào config.ini[/green]")
         except OSError as exc:
             console.print(f"[yellow]Không lưu được config.ini:[/yellow] {exc}")
 
@@ -130,11 +130,11 @@ def feature_ai_waifu() -> None:
             "[red]Thiếu thư viện. Cài đặt:[/red] "
             "[yellow]pip install google-genai[/yellow]"
         )
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     model = Prompt.ask(
-        "[bold]Mô hình[/bold]",
+        "[bold]Model[/bold]",
         default=DEFAULT_MODEL,
     ).strip() or DEFAULT_MODEL
 
@@ -143,12 +143,12 @@ def feature_ai_waifu() -> None:
         chat = client.chats.create(model=model)
     except Exception as exc:
         console.print(f"[red]Không khởi tạo được chat:[/red] {_friendly_api_error(exc)}")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     console.print(
         Panel(
-            f"Mô hình: [yellow]{model}[/yellow]\n"
+            f"Model: [yellow]{model}[/yellow]\n"
             "Gõ tin nhắn để chat. [cyan]/exit[/cyan] hoặc [cyan]q[/cyan] để thoát.",
             title="AI Chat sẵn sàng",
             border_style="magenta",
@@ -166,4 +166,7 @@ def feature_ai_waifu() -> None:
         except Exception as exc:
             console.print(f"[red]Lỗi gửi tin:[/red] {_friendly_api_error(exc)}\n")
 
-    Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+    Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
+
+# Entry point chuẩn cho tool_loader (xem tool_loader.py).
+run = feature_ai_waifu

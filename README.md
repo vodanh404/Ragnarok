@@ -1,6 +1,6 @@
 ⚔️ Ragnarok Control Center
 Bộ công cụ cá nhân chạy trên terminal (Python & Rich), tập hợp nhiều tiện ích vào một giao diện điều khiển duy nhất.
-Phiên bản: 1.1.1
+Phiên bản: 2.0.0
 
 ✨ Điểm nổi bật
 Giao diện terminal trực quan, menu phân nhóm dễ sử dụng.

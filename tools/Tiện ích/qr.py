@@ -33,11 +33,11 @@ def _normalize_output_path(filename: str) -> Path:
 
 def feature_qr() -> None:
     """Tạo mã QR từ văn bản người dùng nhập."""
-    console.print("[bold cyan]═══ TẠO MÃ QR ═══[/bold cyan]\n")
+    console.print("[bold cyan]═══ TẠO MÃ QR CODE ═══[/bold cyan]\n")
     data = Prompt.ask("[bold]Nhập nội dung cần mã hóa[/bold]")
     if not data.strip():
         console.print("[red]Nội dung trống. Hủy.[/red]")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     filename = Prompt.ask(
@@ -48,15 +48,15 @@ def feature_qr() -> None:
     # Chặn ký tự đường dẫn nguy hiểm / không hợp lệ
     if any(c in filename for c in ("\0",)):
         console.print("[red]Tên file không hợp lệ.[/red]")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     out_path = output_path("qr", _normalize_output_path(filename).name, "qrcode.png")
 
     if out_path.exists():
-        if not Confirm.ask(f"[yellow]Tệp đã tồn tại:[/yellow] {out_path}. Ghi đè?", default=False):
+        if not Confirm.ask(f"[yellow]File đã tồn tại:[/yellow] {out_path}. Ghi đè?", default=False):
             console.print("[dim]Đã hủy để tránh ghi đè file.[/dim]")
-            Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+            Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
             return
 
     try:
@@ -74,4 +74,7 @@ def feature_qr() -> None:
     except Exception as exc:
         console.print(f"[red]Lỗi tạo QR:[/red] {exc}")
 
-    Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+    Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
+
+# Entry point chuẩn cho tool_loader (xem tool_loader.py).
+run = feature_qr

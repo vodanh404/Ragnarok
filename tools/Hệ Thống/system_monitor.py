@@ -133,7 +133,7 @@ def _poll_key() -> str:
 def feature_system_monitor() -> None:
     ps = _psutil()
     if not ps:
-        Prompt.ask("Nhấn phím xác nhận để quay lại")
+        Prompt.ask("Enter để quay lại")
         return
     while True:
         show = _snapshot(ps)
@@ -156,3 +156,6 @@ def feature_system_monitor() -> None:
             except KeyboardInterrupt:
                 pass
         console.print()
+
+# Entry point chuẩn cho tool_loader (xem tool_loader.py).
+run = feature_system_monitor

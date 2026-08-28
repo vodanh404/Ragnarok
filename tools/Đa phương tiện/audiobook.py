@@ -1,5 +1,5 @@
 """
-Audiobook: đọc tệp văn bản thành giọng nói (ý tưởng qxresearch audiobook).
+Audiobook: đọc file văn bản thành giọng nói (ý tưởng qxresearch audiobook).
 Dùng gTTS (đã có) – xuất MP3; hỗ trợ file dài theo chunk.
 """
 
@@ -21,43 +21,43 @@ def feature_audiobook() -> None:
     """Đọc file .txt → MP3 bằng gTTS."""
     console.print("[bold cyan]═══ AUDIOBOOK (TEXT → GIỌNG NÓI) ═══[/bold cyan]\n")
 
-    selected = choose_files(title="Chọn tệp văn bản TXT", filetypes=[("Tệp văn bản", "*.txt"), ("Tất cả tệp", "*.*")])
+    selected = choose_files(title="Chọn file văn bản TXT", filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
     if not selected:
         console.print("[dim]Không chọn file. Hủy.[/dim]")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
     src_path = selected[0]
     if not src_path.is_file():
         console.print(f"[red]Không tìm thấy file:[/red] {src_path}")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     try:
         text = src_path.read_text(encoding="utf-8", errors="replace").strip()
     except OSError as exc:
         console.print(f"[red]Không đọc được file:[/red] {exc}")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     if not text:
-        console.print("[red]Tệp trống.[/red]")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        console.print("[red]File trống.[/red]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     lang = Prompt.ask("[bold]Ngôn ngữ[/bold]", default="vi").strip() or "vi"
     slow = Confirm.ask("Đọc chậm?", default=False)
     default_out = f"{src_path.stem}_audiobook.mp3"
     out_name = Prompt.ask(
-        "[bold]Tên tệp xuất[/bold]",
+        "[bold]Tên file xuất[/bold]",
         default=default_out,
     ).strip() or default_out
     if not out_name.lower().endswith(".mp3"):
         out_name += ".mp3"
     out_path = output_path("audiobook", out_name, "audiobook.mp3").expanduser()
     if out_path.exists():
-        if not Confirm.ask(f"[yellow]Tệp đã tồn tại:[/yellow] {out_path}. Ghi đè?", default=False):
+        if not Confirm.ask(f"[yellow]File đã tồn tại:[/yellow] {out_path}. Ghi đè?", default=False):
             console.print("[dim]Đã hủy để tránh ghi đè file.[/dim]")
-            Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+            Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
             return
 
     try:
@@ -66,7 +66,7 @@ def feature_audiobook() -> None:
         console.print(
             "[red]Thiếu thư viện. Cài đặt:[/red] [yellow]pip install gTTS[/yellow]"
         )
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     chunks = _split_text(text, CHUNK_SIZE)
@@ -114,7 +114,7 @@ def feature_audiobook() -> None:
         else:
             console.print(f"[red]Lỗi audiobook:[/red] {exc}")
 
-    Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+    Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
 
 
 def _split_text(text: str, size: int) -> list[str]:
@@ -156,3 +156,6 @@ def _concat_mp3(parts: list[Path], out: Path) -> None:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
         if result.returncode != 0:
             raise RuntimeError((result.stderr or "FFmpeg ghép MP3 thất bại").strip())
+
+# Entry point chuẩn cho tool_loader (xem tool_loader.py).
+run = feature_audiobook

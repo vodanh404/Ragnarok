@@ -51,12 +51,12 @@ def _open_camera(cv2, camera_index: int):
 
 def _choose_camera(cv2) -> Tuple[Optional[int], Optional[object], Optional[str], Optional[object]]:
     """Cho phép chọn camera; nếu index không hợp lệ thì tự dò 0..4."""
-    raw = Prompt.ask("[bold]Số hiệu camera[/bold] (để trống = tự tìm)", default="").strip()
+    raw = Prompt.ask("[bold]Camera index[/bold] (Enter = tự tìm)", default="").strip()
     if raw:
         try:
             indices = [max(0, int(raw))]
         except ValueError:
-            console.print("[yellow]Số hiệu không hợp lệ, sẽ tự tìm camera.[/yellow]")
+            console.print("[yellow]Index không hợp lệ, sẽ tự tìm camera.[/yellow]")
             indices = list(range(5))
     else:
         indices = list(range(5))
@@ -82,7 +82,7 @@ def feature_camera() -> None:
         import cv2
     except ImportError:
         console.print("[red]Thiếu OpenCV.[/red] Cài bằng: [yellow]pip install opencv-python[/yellow]")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     camera_index, cap, backend, first_frame = _choose_camera(cv2)
@@ -92,7 +92,7 @@ def feature_camera() -> None:
             "[dim]Đã thử camera 0–4 và các backend Windows. Hãy kiểm tra quyền Camera, "
             "đóng Zoom/Teams/OBS và thử lại.[/dim]"
         )
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     save_dir = output_dir("camera")
@@ -108,7 +108,7 @@ def feature_camera() -> None:
                     console.print("[red]Không đọc được frame từ camera.[/red]")
                     break
 
-            cv2.imshow("RAGNAROK • Camera (s=chụp, q=thoát)", frame)
+            cv2.imshow("RAGNAROK Camera (s=chup, q=thoat)", frame)
             key = cv2.waitKey(1) & 0xFF
             if key in (ord("q"), 27):
                 break
@@ -130,7 +130,7 @@ def feature_camera() -> None:
         except Exception:
             pass
 
-    Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+    Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
 
 
 def _is_url(text: str) -> bool:
@@ -147,13 +147,13 @@ def feature_qr_scan() -> None:
         import cv2
     except ImportError:
         console.print("[red]Thiếu OpenCV.[/red] Cài bằng: [yellow]pip install opencv-python[/yellow]")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     camera_index, cap, backend, first_frame = _choose_camera(cv2)
     if cap is None:
         console.print("[red]Không thể mở camera để quét QR.[/red]")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     detector = cv2.QRCodeDetector()
@@ -177,8 +177,8 @@ def feature_qr_scan() -> None:
             if data and data != last_data:
                 last_data = data
                 console.print(Panel(f"[bold]{data}[/bold]", title="✓ QR phát hiện", border_style="green"))
-                cv2.putText(frame, "Đã nhận mã QR - xem cửa sổ lệnh", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
-                cv2.imshow("RAGNAROK • Quét QR (q=thoát)", frame)
+                cv2.putText(frame, "QR OK - xem terminal", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+                cv2.imshow("RAGNAROK QR Scanner (q=thoat)", frame)
                 cv2.waitKey(300)
 
                 if _is_url(data):
@@ -187,7 +187,7 @@ def feature_qr_scan() -> None:
                         try:
                             webbrowser.open(data)
                         except Exception as exc:
-                            console.print(f"[red]Không mở được địa chỉ web:[/red] {exc}")
+                            console.print(f"[red]Không mở được URL:[/red] {exc}")
                 else:
                     console.print("[dim]Nội dung text đã được hiển thị ở trên.[/dim]")
 
@@ -196,7 +196,7 @@ def feature_qr_scan() -> None:
                     break
                 last_data = None
 
-            cv2.imshow("RAGNAROK • Quét QR (q=thoát)", frame)
+            cv2.imshow("RAGNAROK QR Scanner (q=thoat)", frame)
             key = cv2.waitKey(1) & 0xFF
             if key in (ord("q"), 27):
                 break
@@ -211,4 +211,18 @@ def feature_qr_scan() -> None:
         except Exception:
             pass
 
-    Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+    Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
+
+
+def run() -> None:
+    """Entry point chuẩn cho tool_loader: cho chọn giữa Camera và Quét QR."""
+    console.print("[bold cyan]═══ CAMERA / QR ═══[/bold cyan]\n")
+    choice = Prompt.ask(
+        "[bold]1[/bold] = Camera (chụp ảnh)   [bold]2[/bold] = Quét mã QR bằng camera",
+        choices=["1", "2"],
+        default="1",
+    )
+    if choice == "1":
+        feature_camera()
+    else:
+        feature_qr_scan()

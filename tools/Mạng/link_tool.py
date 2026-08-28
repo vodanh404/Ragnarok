@@ -64,20 +64,20 @@ def _expand_url(url: str) -> str:
 
 def feature_link_tool() -> None:
     """Rút gọn URL hoặc giải mã link rút gọn."""
-    console.print("[bold cyan]═══ RÚT GỌN / GIẢI MÃ ĐỊA CHỈ WEB ═══[/bold cyan]\n")
+    console.print("[bold cyan]═══ RÚT GỌN / GIẢI MÃ URL ═══[/bold cyan]\n")
     console.print(
         "[dim]1 = Rút gọn URL  |  2 = Giải mã (expand) link rút gọn[/dim]\n"
     )
 
     mode = Prompt.ask("[bold]Chế độ[/bold]", choices=["1", "2"], default="1")
-    url = Prompt.ask("[bold]Nhập địa chỉ web[/bold]").strip()
+    url = Prompt.ask("[bold]Nhập URL[/bold]").strip()
     if not url:
-        console.print("[red]Địa chỉ web trống. Hủy.[/red]")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        console.print("[red]URL trống. Hủy.[/red]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
     if not _is_plausible_url(url):
-        console.print("[red]Địa chỉ web không hợp lệ (cần http:// hoặc https://).[/red]")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        console.print("[red]URL không hợp lệ (cần http:// hoặc https://).[/red]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     try:
@@ -86,7 +86,7 @@ def feature_link_tool() -> None:
         console.print(
             "[red]Thiếu thư viện. Cài đặt:[/red] [yellow]pip install requests[/yellow]"
         )
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     try:
@@ -113,10 +113,13 @@ def feature_link_tool() -> None:
                 )
             )
     except requests.exceptions.Timeout:
-        console.print("[red]Đã quá thời gian chờ. Kiểm tra mạng.[/red]")
+        console.print("[red]Hết thời gian chờ (timeout). Kiểm tra mạng.[/red]")
     except requests.exceptions.ConnectionError:
         console.print("[red]Lỗi mạng – kiểm tra kết nối Internet.[/red]")
     except Exception as exc:
         console.print(f"[red]Lỗi:[/red] {exc}")
 
-    Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+    Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
+
+# Entry point chuẩn cho tool_loader (xem tool_loader.py).
+run = feature_link_tool

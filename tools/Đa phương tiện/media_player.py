@@ -425,7 +425,7 @@ def _render_player(player: MusicPlayer) -> Panel:
     table.add_row("Tệp", str(track.path))
 
     help_text = (
-        "[Phím cách] Phát/Dừng  [N] Tiếp  [P] Trước  [←/→] Tua  [↑/↓] Âm lượng  "
+        "[Space] Phát/Dừng  [N] Tiếp  [P] Trước  [←/→] Tua  [↑/↓] Âm lượng  "
         "[S] Ngẫu nhiên  [R] Lặp  [A] Thêm  [F] Thư mục  [L] Thư viện  [D] Xóa  [Q] Thoát"
     )
     return Panel(table, title="[bold magenta]TRÌNH PHÁT NHẠC RAGNAROK[/bold magenta]", subtitle=help_text, box=HEAVY)
@@ -443,7 +443,7 @@ def _render_library(player: MusicPlayer) -> None:
         style = "bold cyan" if i - 1 == player.index else None
         table.add_row(str(i), track.title, track.artist, track.album, _format_time(track.duration), style=style)
     console.print(table)
-    console.print("[dim]Nhập số bài để phát, hoặc để trống để quay lại.[/dim]")
+    console.print("[dim]Nhập số bài để phát, hoặc Enter để quay lại.[/dim]")
     choice = Prompt.ask("Bài hát", default="").strip()
     if choice.isdigit():
         idx = int(choice) - 1
@@ -480,7 +480,7 @@ def feature_media_player() -> None:
         player.init_audio()
     except Exception as exc:
         console.print(f"[red]{exc}[/red]")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     console.clear()
@@ -513,7 +513,7 @@ def feature_media_player() -> None:
     if not player.tracks:
         console.print("[yellow]Không tìm thấy tệp nhạc được hỗ trợ.[/yellow]")
         player.close()
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     try:
@@ -521,13 +521,13 @@ def feature_media_player() -> None:
     except Exception as exc:
         player.close()
         console.print(f"[red]Không phát được bài đầu tiên: {exc}[/red]")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     try:
-        # Màn hình Live tạm thời; khi thoát Rich sẽ tự xóa bản render cuối.
+        # Không dùng màn hình thay thế; mọi thứ nằm trong cùng một cửa sổ CMD.
         with _Keyboard() as keyboard:
-            with Live(_render_player(player), console=console, refresh_per_second=8, screen=False, transient=True) as live:
+            with Live(_render_player(player), console=console, refresh_per_second=8, screen=False, transient=False) as live:
                 while True:
                     key = keyboard.get_key()
                     if key is not None:
@@ -571,6 +571,8 @@ def feature_media_player() -> None:
         pass
     finally:
         player.close()
-        console.clear()
         console.print("\n[green]Đã thoát trình phát nhạc.[/green]")
         time.sleep(0.4)
+
+# Entry point chuẩn cho tool_loader (xem tool_loader.py).
+run = feature_media_player

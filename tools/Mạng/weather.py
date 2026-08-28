@@ -47,19 +47,19 @@ def _save_api_key(api_key: str) -> None:
 def feature_weather() -> None:
     """Tra cứu thời tiết theo thành phố."""
     console.print("[bold cyan]═══ TRA CỨU THỜI TIẾT ═══[/bold cyan]\n")
-    console.print("[dim]Dịch vụ thời tiết trực tuyến (cần mã truy cập miễn phí)[/dim]\n")
+    console.print("[dim]API: openweathermap.org (cần API key miễn phí)[/dim]\n")
     console.print(
-        "[dim]Có thể cấu hình bằng biến môi trường hoặc tệp config.ini[/dim]\n"
+        "[dim]Cấu hình: env OPENWEATHER_API_KEY hoặc config.ini [Settings] API_Key[/dim]\n"
     )
 
     api_key = _load_api_key()
     if api_key:
-        console.print("[green]Đã có mã truy cập được lưu.[/green]")
+        console.print("[green]Đã có API key (env hoặc config.ini)[/green]")
         use_saved = Prompt.ask(
-            "Dùng mã truy cập đã có?", choices=["y", "n"], default="y"
+            "Dùng key đã có?", choices=["y", "n"], default="y"
         )
         if use_saved == "n":
-            api_key = Prompt.ask("[bold]Nhập mã truy cập mới[/bold]").strip()
+            api_key = Prompt.ask("[bold]Nhập API key mới[/bold]").strip()
     else:
         console.print(
             "[yellow]Chưa có API key.[/yellow]\n"
@@ -68,14 +68,14 @@ def feature_weather() -> None:
             "  2. Hoặc nhập key bên dưới (sẽ lưu vào config.ini)\n"
             "  3. Lấy key miễn phí tại: https://openweathermap.org/api\n"
         )
-        api_key = Prompt.ask("[bold]Nhập mã truy cập dịch vụ thời tiết[/bold]").strip()
+        api_key = Prompt.ask("[bold]Nhập OpenWeatherMap API key[/bold]").strip()
 
     if not api_key:
         console.print(
-            "[red]Thiếu mã truy cập. Hủy.[/red]\n"
+            "[red]Thiếu API key. Hủy.[/red]\n"
             "[dim]Set OPENWEATHER_API_KEY hoặc thêm vào config.ini.[/dim]"
         )
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     # Chỉ lưu khi người dùng vừa nhập (không ghi đè nếu lấy từ env)
@@ -91,7 +91,7 @@ def feature_weather() -> None:
     city = Prompt.ask("[bold]Tên thành phố[/bold]", default="Ho Chi Minh").strip()
     if not city:
         console.print("[red]Tên thành phố trống.[/red]")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     try:
@@ -102,7 +102,7 @@ def feature_weather() -> None:
             "[red]Thiếu thư viện. Cài đặt:[/red] "
             "[yellow]pip install requests unidecode[/yellow]"
         )
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     city_norm = unidecode(city)
@@ -155,10 +155,10 @@ def feature_weather() -> None:
                 console.print(f"[red]Không tìm thấy thành phố:[/red] {city}")
             else:
                 console.print(
-                    f"[red]Lỗi dịch vụ ({cod}):[/red] {message}"
+                    f"[red]Lỗi API ({cod}):[/red] {message}"
                 )
     except requests.exceptions.Timeout:
-        console.print("[red]Đã quá thời gian chờ. Thử lại sau.[/red]")
+        console.print("[red]Hết thời gian chờ (timeout). Thử lại sau.[/red]")
     except requests.exceptions.ConnectionError:
         console.print("[red]Lỗi mạng – kiểm tra kết nối Internet.[/red]")
     except requests.exceptions.RequestException as exc:
@@ -168,4 +168,7 @@ def feature_weather() -> None:
     except Exception as exc:
         console.print(f"[red]Lỗi:[/red] {exc}")
 
-    Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+    Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
+
+# Entry point chuẩn cho tool_loader (xem tool_loader.py).
+run = feature_weather

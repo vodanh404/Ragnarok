@@ -25,39 +25,39 @@ def _require_pypdf():
 
 
 def feature_pdf_merge() -> None:
-    """Gộp nhiều tệp PDF thành một file."""
-    console.print("[bold cyan]═══ GỘP TỆP PDF ═══[/bold cyan]\n")
+    """Gộp nhiều file PDF thành một file."""
+    console.print("[bold cyan]═══ GỘP PDF (MERGE) ═══[/bold cyan]\n")
     paths = [
         p for p in choose_files(
-            title="Chọn các tệp PDF để gộp",
-            filetypes=[("PDF", "*.pdf"), ("Tất cả tệp", "*.*")],
+            title="Chọn các file PDF để gộp",
+            filetypes=[("PDF", "*.pdf"), ("All files", "*.*")],
             multiple=True,
-            prompt="Chọn cách nhập các tệp PDF",
+            prompt="Chọn cách nhập các file PDF",
         )
         if p.suffix.lower() == ".pdf"
     ]
 
     if len(paths) < 2:
-        console.print("[red]Cần ít nhất 2 tệp PDF để gộp.[/red]")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        console.print("[red]Cần ít nhất 2 file PDF để gộp.[/red]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     out_name = Prompt.ask(
-        "[bold]Tên tệp xuất[/bold]",
+        "[bold]Tên file xuất[/bold]",
         default="merged.pdf",
     ).strip() or "merged.pdf"
     if not out_name.lower().endswith(".pdf"):
         out_name += ".pdf"
     out_path = output_path("pdf", out_name, "output.pdf")
     if out_path.exists():
-        if not Confirm.ask(f"[yellow]Tệp đã tồn tại:[/yellow] {out_path}. Ghi đè?", default=False):
+        if not Confirm.ask(f"[yellow]File đã tồn tại:[/yellow] {out_path}. Ghi đè?", default=False):
             console.print("[dim]Đã hủy để tránh ghi đè file.[/dim]")
-            Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+            Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
             return
 
     PdfReader, PdfWriter = _require_pypdf()
     if PdfReader is None:
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     try:
@@ -74,7 +74,7 @@ def feature_pdf_merge() -> None:
 
         if len(writer.pages) == 0:
             console.print("[red]Không có trang nào để ghi (toàn bộ file bị bỏ qua).[/red]")
-            Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+            Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
             return
 
         if out_path.parent != Path("."):
@@ -90,68 +90,68 @@ def feature_pdf_merge() -> None:
     except Exception as exc:
         console.print(f"[red]Lỗi gộp PDF:[/red] {exc}")
 
-    Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+    Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
 
 
 def feature_pdf_protect() -> None:
     """Khóa PDF bằng mật khẩu (user password)."""
-    console.print("[bold cyan]═══ KHÓA TỆP PDF BẰNG MẬT KHẨU ═══[/bold cyan]\n")
+    console.print("[bold cyan]═══ KHÓA PDF BẰNG MẬT KHẨU ═══[/bold cyan]\n")
 
     selected = choose_files(
-        title="Chọn tệp PDF cần khóa",
-        filetypes=[("PDF", "*.pdf"), ("Tất cả tệp", "*.*")],
+        title="Chọn file PDF cần khóa",
+        filetypes=[("PDF", "*.pdf"), ("All files", "*.*")],
     )
     if not selected:
         console.print("[dim]Không chọn file. Hủy.[/dim]")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
     src_path = selected[0]
     if not src_path.is_file():
         console.print(f"[red]Không tìm thấy file:[/red] {src_path}")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
     if src_path.suffix.lower() != ".pdf":
-        console.print("[red]Tệp phải có đuôi .pdf[/red]")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        console.print("[red]File phải có đuôi .pdf[/red]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     password = Prompt.ask("[bold]Mật khẩu bảo vệ[/bold]", password=True).strip()
     if not password:
         console.print("[red]Mật khẩu trống. Hủy.[/red]")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
     confirm = Prompt.ask("[bold]Nhập lại mật khẩu[/bold]", password=True).strip()
     if password != confirm:
         console.print("[red]Mật khẩu không khớp. Hủy.[/red]")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     default_out = f"{src_path.stem}_protected.pdf"
     out_name = Prompt.ask(
-        "[bold]Tên tệp xuất[/bold]",
+        "[bold]Tên file xuất[/bold]",
         default=default_out,
     ).strip() or default_out
     if not out_name.lower().endswith(".pdf"):
         out_name += ".pdf"
     out_path = output_path("pdf", out_name, "output.pdf")
     if out_path.exists():
-        if not Confirm.ask(f"[yellow]Tệp đã tồn tại:[/yellow] {out_path}. Ghi đè?", default=False):
+        if not Confirm.ask(f"[yellow]File đã tồn tại:[/yellow] {out_path}. Ghi đè?", default=False):
             console.print("[dim]Đã hủy để tránh ghi đè file.[/dim]")
-            Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+            Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
             return
 
     PdfReader, PdfWriter = _require_pypdf()
     if PdfReader is None:
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     try:
         reader = PdfReader(str(src_path))
         if reader.is_encrypted:
             console.print(
-                "[red]Tệp đã được mã hóa. Giải mã trước khi khóa lại.[/red]"
+                "[red]File đã được mã hóa. Giải mã trước khi khóa lại.[/red]"
             )
-            Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+            Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
             return
 
         writer = PdfWriter()
@@ -171,4 +171,18 @@ def feature_pdf_protect() -> None:
     except Exception as exc:
         console.print(f"[red]Lỗi khóa PDF:[/red] {exc}")
 
-    Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+    Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
+
+
+def run() -> None:
+    """Entry point chuẩn cho tool_loader: cho chọn giữa Gộp PDF và Khóa PDF."""
+    console.print("[bold cyan]═══ CÔNG CỤ PDF ═══[/bold cyan]\n")
+    choice = Prompt.ask(
+        "[bold]1[/bold] = Gộp nhiều PDF   [bold]2[/bold] = Khóa PDF bằng mật khẩu",
+        choices=["1", "2"],
+        default="1",
+    )
+    if choice == "1":
+        feature_pdf_merge()
+    else:
+        feature_pdf_protect()

@@ -34,7 +34,7 @@ def _dialog_pick(*, multiple: bool, filetypes: Iterable[tuple[str, str]], title:
             root.destroy()
     except Exception as exc:
         console.print(
-            f"[yellow]Không mở được hộp thoại chọn tệp ({type(exc).__name__}). "
+            f"[yellow]Không mở được hộp thoại chọn file ({type(exc).__name__}). "
             "Chuyển sang nhập đường dẫn.[/yellow]"
         )
         return None
@@ -66,7 +66,7 @@ def choose_files(
             paths = [Path(p) for p in selected if p]
             missing = [p for p in paths if not p.is_file()]
             if missing:
-                console.print("[red]Một số tệp không còn tồn tại:[/red]")
+                console.print("[red]Một số file không còn tồn tại:[/red]")
                 for p in missing:
                     console.print(f"  • {p}")
             return [p for p in paths if p.is_file()]
@@ -74,12 +74,12 @@ def choose_files(
 
     if multiple:
         console.print(
-            "[dim]Nhập từng đường dẫn, để trống để kết thúc. Bạn cũng có thể "
+            "[dim]Nhập từng đường dẫn, Enter trống để kết thúc. Bạn cũng có thể "
             "dán nhiều đường dẫn cách nhau bằng dấu phẩy.[/dim]"
         )
         paths: list[Path] = []
         while True:
-            raw = Prompt.ask(f"[bold]Tệp số #{len(paths) + 1}[/bold] (để trống = hoàn tất)", default="").strip()
+            raw = Prompt.ask(f"[bold]File #{len(paths) + 1}[/bold] (trống = xong)", default="").strip()
             if not raw:
                 break
             for item in raw.split(","):
@@ -90,7 +90,7 @@ def choose_files(
                 if p.is_file():
                     paths.append(p)
                 else:
-                    console.print(f"[red]Không tìm thấy tệp:[/red] {p}")
+                    console.print(f"[red]Không tìm thấy file:[/red] {p}")
         return paths
 
     raw = Prompt.ask("[bold]Đường dẫn file[/bold]").strip().strip('"')
@@ -98,6 +98,6 @@ def choose_files(
         return []
     path = Path(raw).expanduser()
     if not path.is_file():
-        console.print(f"[red]Không tìm thấy tệp:[/red] {path}")
+        console.print(f"[red]Không tìm thấy file:[/red] {path}")
         return []
     return [path]

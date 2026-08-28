@@ -17,7 +17,7 @@ VIDEO_EXTS = {".mp4", ".mkv", ".avi", ".mov", ".webm", ".flv", ".m4v", ".wmv"}
 
 
 def feature_audio_extract() -> None:
-    """Tách bản âm thanh từ video → MP3/WAV/AAC."""
+    """Tách track audio từ video → MP3/WAV/AAC."""
     console.print("[bold cyan]═══ TÁCH AUDIO TỪ VIDEO ═══[/bold cyan]\n")
 
     if not shutil.which("ffmpeg"):
@@ -28,21 +28,21 @@ def feature_audio_extract() -> None:
             "  • macOS:         [cyan]brew install ffmpeg[/cyan]\n"
             "  • Windows:       https://ffmpeg.org/download.html\n"
         )
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     selected = choose_files(
-        title="Chọn tệp video",
-        filetypes=[("Video", "*.mp4;*.mkv;*.avi;*.mov;*.webm;*.flv;*.m4v;*.wmv"), ("Tất cả tệp", "*.*")],
+        title="Chọn file video",
+        filetypes=[("Video", "*.mp4;*.mkv;*.avi;*.mov;*.webm;*.flv;*.m4v;*.wmv"), ("All files", "*.*")],
     )
     if not selected:
         console.print("[dim]Không chọn file. Hủy.[/dim]")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
     src_path = selected[0]
     if not src_path.is_file():
         console.print(f"[red]Không tìm thấy file:[/red] {src_path}")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
         return
 
     fmt = Prompt.ask(
@@ -52,16 +52,16 @@ def feature_audio_extract() -> None:
     )
     default_out = f"{src_path.stem}.{fmt}"
     out_name = Prompt.ask(
-        "[bold]Tên tệp xuất[/bold]",
+        "[bold]Tên file xuất[/bold]",
         default=default_out,
     ).strip() or default_out
     if not out_name.lower().endswith(f".{fmt}"):
         out_name = f"{out_name}.{fmt}"
     out_path = output_path("audio", out_name, default_out)
     if out_path.exists():
-        if not Confirm.ask(f"[yellow]Tệp đã tồn tại:[/yellow] {out_path}. Ghi đè?", default=False):
+        if not Confirm.ask(f"[yellow]File đã tồn tại:[/yellow] {out_path}. Ghi đè?", default=False):
             console.print("[dim]Đã hủy để tránh ghi đè file.[/dim]")
-            Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+            Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
             return
 
 
@@ -98,7 +98,7 @@ def feature_audio_extract() -> None:
             console.print(f"[red]FFmpeg lỗi:[/red]\n{tail}")
         elif not out_path.is_file() or out_path.stat().st_size == 0:
             console.print(
-                "[red]Không tạo được file audio (video có thể không có bản âm thanh).[/red]"
+                "[red]Không tạo được file audio (video có thể không có track audio).[/red]"
             )
         else:
             size_kb = out_path.stat().st_size / 1024
@@ -113,4 +113,7 @@ def feature_audio_extract() -> None:
     except Exception as exc:
         console.print(f"[red]Lỗi:[/red] {exc}")
 
-    Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+    Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
+
+# Entry point chuẩn cho tool_loader (xem tool_loader.py).
+run = feature_audio_extract

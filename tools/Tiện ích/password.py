@@ -23,4 +23,7 @@ def feature_password() -> None:
     alphabet = string.ascii_letters + string.digits + "!@#$%^&*()-_=+"
     password = "".join(secrets.choice(alphabet) for _ in range(length))
     console.print(f"\n[bold yellow]Mật khẩu:[/bold yellow] {password}\n")
-    Prompt.ask("[dim]Nhấn phím xác nhận để quay lại...[/dim]")
+    Prompt.ask("[dim]Nhấn Enter để quay lại...[/dim]")
+
+# Entry point chuẩn cho tool_loader (xem tool_loader.py).
+run = feature_password
