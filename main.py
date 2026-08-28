@@ -1,11 +1,9 @@
 """
 RAGNAROK CONTROL CENTER - Entry point
-Poket_studio v1.1.1
+Poket_studio v1.0.0
 """
 
 import os
-os.environ.setdefault("PYTHONDONTWRITEBYTECODE", "1")
-
 from menu import main_menu
 
 
@@ -23,4 +21,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    # Không cho Python ghi file .pyc
+    os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
     main()

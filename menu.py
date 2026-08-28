@@ -1,135 +1,125 @@
-"""Hệ thống menu chính của RAGNAROK."""
+"""
+Menu system - Dynamic Feature Loading.
 
-from typing import Callable
+Categories and tools are no longer hard-coded here: they are discovered at
+runtime from tools/ by tool_loader.discover_tools(). Adding a .py file (or a
+sub-folder) under tools/ makes it show up here automatically -- see
+tool_loader.py for the plugin standard every tool file must follow.
+"""
 
-from rich.prompt import Prompt
 from rich.table import Table
+from rich.prompt import Prompt
 
 from ui.header import show_header
-from ui.console import console
-from tools import (
-    feature_camera, feature_qr_scan, feature_qr, feature_barcode, feature_weather,
-    feature_pokemon, feature_element, feature_ai_waifu, feature_tts, feature_downloader,
-    feature_password, feature_wiki, feature_media_player, feature_link_tool,
-    feature_pdf_merge, feature_pdf_protect, feature_audio_extract, feature_screenshot,
-    feature_voice_recorder, feature_audiobook, feature_system_monitor,
-    feature_terminal_image, feature_time_center,
-)
+from ui.console import console, get_current_theme
+from tool_loader import discover_tools, DEFAULT_CATEGORY
 
 
-def _open_feature(feature: Callable[[], None]) -> None:
-    """Mở một chức năng trên màn hình riêng, luôn dọn sạch khi vào/ra."""
-    from ui.header import clear_screen
-    clear_screen()
-    show_header()
+def _print_warnings(warnings) -> None:
+    """Show tools that failed to load (syntax error, missing run(), ...)."""
+    if not warnings:
+        return
+    console.print("[bold yellow]⚠ Một số tool không tải được:[/bold yellow]")
+    for file_name, reason in warnings:
+        console.print(f"  [yellow]- {file_name}:[/yellow] {reason}")
+    console.print()
+
+
+def _run_tool(entry) -> None:
+    """Run one tool. Any runtime error is caught so the app never crashes."""
     try:
-        feature()
-    except KeyboardInterrupt:
-        console.print("\n[yellow]Đã dừng chức năng.[/yellow]")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]", default="")
-    except Exception as exc:
-        console.print(f"\n[bold red]Chức năng gặp lỗi:[/bold red] {exc}")
-        Prompt.ask("\n[dim]Nhấn phím xác nhận để quay lại...[/dim]", default="")
-    finally:
-        # Xóa render cuối của các màn hình Live/Progress trước khi dựng menu.
-        clear_screen()
+        entry.run()
+    except Exception as exc:  # noqa: BLE001 - a tool crashing must not kill the menu
+        console.print(f"[bold red]Lỗi khi chạy '{entry.name}':[/bold red] {exc}")
+        Prompt.ask("\n[dim]Nhấn Enter để quay lại...[/dim]")
 
 
-def _draw_menu(title: str, rows: list[tuple[str, str]]) -> str:
-    """Hiển thị menu và trả về lựa chọn."""
-    show_header()
-    table = Table(title=title, border_style="bold red", header_style="bold yellow", expand=False)
-    table.add_column("STT", style="bold red", justify="center", width=5)
-    table.add_column("Tính năng", style="bold white", min_width=34)
-    for number, label in rows:
-        table.add_row(number, label)
-    console.print(table)
-    return Prompt.ask("\n[bold red]Lựa chọn[/bold red]")
+def _category_menu(category: str) -> None:
+    """List tools inside one category and dispatch the user's choice.
 
-
-def _run_submenu(rows, actions, title) -> None:
+    Re-scans tools/ every time this screen is (re)drawn -- same as
+    main_menu() -- so tools added, removed, or edited while the user is
+    browsing *inside* this category show up immediately, with no need to
+    back out to the main menu first."""
     while True:
-        choice = _draw_menu(title, rows)
+        categories, warnings = discover_tools()
+        entries = categories.get(category)
+
+        if not entries:
+            # Category vanished (last tool inside it was removed/renamed/
+            # broke on reload) -- don't crash or show a stale empty screen,
+            # just tell the user and bounce back to the main menu.
+            console.print(
+                f"[yellow]Danh mục '{category}' hiện không còn tool nào "
+                f"(có thể vừa bị xoá/đổi tên/lỗi tải lại). Quay lại menu chính...[/yellow]"
+            )
+            Prompt.ask("\n[dim]Nhấn Enter để tiếp tục...[/dim]")
+            return
+
+        show_header()
+        _print_warnings(warnings)
+        theme = get_current_theme()
+        table = Table(
+            title=category.upper(),
+            border_style=theme.primary_style(),
+            header_style=theme.accent_style(),
+        )
+        table.add_column("STT", style=theme.primary_style(), justify="center")
+        table.add_column("Tính năng", style=theme.accent_style())
+        for i, entry in enumerate(entries, start=1):
+            table.add_row(str(i), entry.name)
+        table.add_row("0", "Quay lại Menu Chính")
+        console.print(table)
+
+        choice = Prompt.ask(
+            f"[{theme.primary_style()}]Lựa chọn[/{theme.primary_style()}]",
+            choices=[str(i) for i in range(len(entries) + 1)],
+        )
         if choice == "0":
             return
-        feature = actions.get(choice)
-        if feature:
-            _open_feature(feature)
-
-
-def menu_vision() -> None:
-    _run_submenu(
-        [("1", "Mở camera"), ("2", "Tạo mã QR"), ("3", "Tạo mã vạch Code128"),
-         ("4", "Quét mã QR bằng camera"), ("5", "Chụp màn hình"),
-         ("6", "Xem hình ảnh trong cửa sổ lệnh"), ("0", "Quay lại menu chính")],
-        {"1": feature_camera, "2": feature_qr, "3": feature_barcode, "4": feature_qr_scan,
-         "5": feature_screenshot, "6": feature_terminal_image},
-        "[1] THỊ GIÁC VÀ QUÉT MÃ",
-    )
-
-
-def menu_lookup() -> None:
-    _run_submenu(
-        [("1", "Tra cứu thời tiết"), ("2", "Tra cứu Pokémon và thẻ Pokémon"),
-         ("3", "Bảng tuần hoàn hóa học"), ("4", "Tìm kiếm Wikipedia"), ("0", "Quay lại menu chính")],
-        {"1": feature_weather, "2": feature_pokemon, "3": feature_element, "4": feature_wiki},
-        "[2] TRA CỨU VÀ DỮ LIỆU",
-    )
-
-
-def menu_time() -> None:
-    rows = [("1", "Đồng hồ hiện tại"), ("2", "Lịch tháng"), ("3", "Đếm ngược"),
-            ("4", "Đồng hồ cà chua"), ("0", "Quay lại menu chính")]
-    while True:
-        choice = _draw_menu("[3] TRUNG TÂM THỜI GIAN", rows)
-        if choice == "0":
-            return
-        if choice in {"1", "2", "3", "4"}:
-            _open_feature(lambda c=choice: feature_time_center(c))
-
-
-def menu_ai() -> None:
-    _run_submenu(
-        [("1", "Trò chuyện với trí tuệ nhân tạo"), ("2", "Chuyển văn bản thành giọng nói"),
-         ("3", "Ghi âm"), ("4", "Tạo sách nói từ văn bản"), ("0", "Quay lại menu chính")],
-        {"1": feature_ai_waifu, "2": feature_tts, "3": feature_voice_recorder, "4": feature_audiobook},
-        "[4] TRÍ TUỆ NHÂN TẠO VÀ GIỌNG NÓI",
-    )
-
-
-def menu_media() -> None:
-    _run_submenu(
-        [("1", "Tải video hoặc nhạc từ YouTube"), ("2", "Trình phát nhạc Ragnarok"),
-         ("3", "Gộp tệp PDF"), ("4", "Khóa tệp PDF bằng mật khẩu"),
-         ("5", "Tách âm thanh từ video"), ("0", "Quay lại menu chính")],
-        {"1": feature_downloader, "2": feature_media_player, "3": feature_pdf_merge,
-         "4": feature_pdf_protect, "5": feature_audio_extract},
-        "[5] ĐA PHƯƠNG TIỆN VÀ TỆP",
-    )
-
-
-def menu_system() -> None:
-    _run_submenu(
-        [("1", "Tạo mật khẩu ngẫu nhiên"), ("2", "Rút gọn hoặc giải mã địa chỉ web"),
-         ("3", "Giám sát CPU, RAM, GPU, ổ đĩa và mạng"), ("0", "Quay lại menu chính")],
-        {"1": feature_password, "2": feature_link_tool, "3": feature_system_monitor},
-        "[6] CÔNG CỤ HỆ THỐNG",
-    )
+        _run_tool(entries[int(choice) - 1])
 
 
 def main_menu() -> None:
-    rows = [
-        ("1", "Thị giác và quét mã"), ("2", "Tra cứu và dữ liệu"), ("3", "Trung tâm thời gian"),
-        ("4", "Trí tuệ nhân tạo và giọng nói"), ("5", "Đa phương tiện và tệp"),
-        ("6", "Công cụ hệ thống"), ("0", "Thoát chương trình"),
-    ]
-    actions = {"1": menu_vision, "2": menu_lookup, "3": menu_time, "4": menu_ai,
-               "5": menu_media, "6": menu_system}
+    """Main menu of RAGNAROK CONTROL CENTER. Re-scans tools/ every loop, so
+    tools added while the app is running show up the next time this screen
+    is drawn -- no restart, no manual registration needed."""
     while True:
-        choice = _draw_menu("MENU CHÍNH", rows)
+        categories, warnings = discover_tools()
+        show_header()
+        _print_warnings(warnings)
+
+        if not categories:
+            console.print("[yellow]Chưa có tool nào trong thư mục tools/.[/yellow]")
+            Prompt.ask("\n[dim]Nhấn Enter để thử lại...[/dim]")
+            continue
+
+        # General/"Chung" category (root-level tools) is listed first, the
+        # rest are alphabetical.
+        names = sorted(
+            categories.keys(), key=lambda c: (c != DEFAULT_CATEGORY, c.lower())
+        )
+
+        theme = get_current_theme()
+        table = Table(
+            title="MENU CHÍNH",
+            border_style=theme.primary_style(),
+            header_style=theme.accent_style(),
+        )
+        table.add_column("STT", style=theme.primary_style(), justify="center")
+        table.add_column("Danh mục", style=theme.accent_style())
+        for i, name in enumerate(names, start=1):
+            table.add_row(str(i), f"{name} ({len(categories[name])} tool)")
+        table.add_row("0", "Thoát chương trình")
+        console.print(table)
+
+        choice = Prompt.ask(
+            f"[{theme.primary_style()}]Lựa chọn[/{theme.primary_style()}]",
+            choices=[str(i) for i in range(len(names) + 1)],
+        )
         if choice == "0":
-            console.print("\n[bold green]Tạm biệt! Hẹn gặp lại.[/bold green]")
-            return
-        action = actions.get(choice)
-        if action:
-            action()
+            console.print("[bold green]Tạm biệt! Hẹn gặp lại.[/bold green]")
+            break
+
+        category = names[int(choice) - 1]
+        _category_menu(category)
